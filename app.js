@@ -38,8 +38,6 @@ var express     = require('express'),
 
 function iodocs(iodocsDir)  {
 
-    console.log("iodocsDir",iodocsDir)
-
     // Configuration
     try {
         var config = require(iodocsDir + '/config.json');
@@ -289,6 +287,7 @@ function iodocs(iodocsDir)  {
             console.log(util.inspect(req.body, null, 3));
         };
 
+
         var reqQuery = req.body,
             customHeaders = {},
             params = reqQuery.params || {},
@@ -470,8 +469,13 @@ function iodocs(iodocsDir)  {
                             req.resultHeaders = req.resultHeaders || 'None';
                         }
 
-                        req.call = url.parse(options.host + options.path);
-                        req.call = url.format(req.call);
+                        var strHeaders = '';
+                        for (var header in options.headers) { 
+                            strHeaders += ' -H "' + header + ':' + options.headers[header] + '"';
+                        }
+
+                        req.call = 'curl -v -L -X ' +  options.method  + strHeaders + (requestBody ? ' -d "' + requestBody + '" ' : ' ') + '"' + options.protocol + "//" + options.host + (options.port ? ':' + options.port : '') + options.path + '"';
+                        //req.call = url.format(req.call);
 
                         // Response body
                         req.result = body;
@@ -620,8 +624,13 @@ function iodocs(iodocsDir)  {
 
                     // Set Headers and Call
                     req.resultHeaders = response.headers;
-                    req.call = url.parse(options.host + options.path);
-                    req.call = url.format(req.call);
+                    var strHeaders = '';
+                    for (var header in options.headers) { 
+                        strHeaders += ' -H "' + header + ':' + options.headers[header] + '"';
+                    }
+
+                    req.call = 'curl -v -L -X ' +  options.method  + strHeaders + (requestBody ? ' -d "' + requestBody + '" ' : ' ') + '"' + options.protocol + "//" + options.host + (options.port ? ':' + options.port : '') + options.path + '"';
+                    //req.call = url.format(req.call);
 
                     // Response body
                     req.result = body;
